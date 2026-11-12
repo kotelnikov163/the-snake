@@ -1,6 +1,7 @@
 from random import randint
 
 import pygame
+
 pygame.init()
 
 # Константы для размеров поля и сетки:
