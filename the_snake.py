@@ -44,8 +44,7 @@ class GameObject():
 
     def draw_cell(self, position, color=None, draw_border=True):
         """Отрисовывает одну ячейку(квадрат) в заданной позиции."""
-        if color is None:
-            color = self.body_color
+        color = color or self.body_color
         rect = pg.Rect(position, (GRID_SIZE, GRID_SIZE))
         pg.draw.rect(screen, color, rect)
 
@@ -94,7 +93,6 @@ class Snake(GameObject):
 
     def reset(self):
         """Сбрасывает змейку в центр."""
-        self.position = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
         self.positions = [self.position]
         self.length = 1
         self.direction = RIGHT
@@ -110,7 +108,8 @@ class Snake(GameObject):
     def draw(self):
         """Отрисовывает змейку."""
         if self.last:
-            self.draw_cell(self.last, BOARD_BACKGROUND_COLOR,
+            self.draw_cell(self.last,
+                           BOARD_BACKGROUND_COLOR,
                            draw_border=False)
 
         self.draw_cell(self.get_head_position())
@@ -139,7 +138,7 @@ def handle_keys(game_object):
         if event.type == pg.QUIT:
             pg.quit()
             raise SystemExit
-        elif event.type == pg.KEYDOWN:
+        if event.type == pg.KEYDOWN:
             if event.key == pg.K_UP and game_object.direction != DOWN:
                 game_object.next_direction = UP
             elif event.key == pg.K_DOWN and game_object.direction != UP:
@@ -153,7 +152,7 @@ def handle_keys(game_object):
 def main():
     """Основная функция игры, запускающая игровой цикл."""
     snake = Snake()
-    apple = Apple()
+    apple = Apple(snake.positions)
     screen.fill(BOARD_BACKGROUND_COLOR)
 
     while True:
@@ -173,9 +172,7 @@ def main():
         # Определение столкновений
         if snake.get_head_position() == apple.position:
             snake.length += 1
-            apple.randomize_position()
-            while apple.position in snake.positions:
-                apple.randomize_position()
+            apple.randomize_position(snake.positions)
 
         if snake.get_head_position() in snake.positions[1:]:
             snake.reset()
